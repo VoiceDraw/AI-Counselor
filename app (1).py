@@ -5,7 +5,7 @@ import openai
 from langdetect import detect  # langdetectパッケージをインポート
 
 # Streamlit Community Cloudの「Secrets」からOpenAI API keyを取得
-openai.api_key = st.secrets["OpenAIAPI"]["openai_api_key"]
+openai.api_key = st.secrets.OpenAIAPI.openai_api_key
 
 # st.session_stateを使いメッセージのやりとりを保存
 if "messages" not in st.session_state:
@@ -14,10 +14,8 @@ if "messages" not in st.session_state:
     ]
 
 # チャットボットとやりとりする関数
-def communicate():
+def communicate(user_input):
     messages = st.session_state["messages"]
-
-    user_input = st.session_state["user_input"]
 
     # 入力の言語を検出
     detected_language = detect(user_input)
@@ -36,6 +34,12 @@ def communicate():
     )
 
     bot_message = response["choices"][0]["message"]
+    
+    # AIの応答が読解不能な場合を処理
+    if "この要求はタイムアウトしました" in bot_message:  # タイムアウトエラーメッセージを検出
+        st.warning("AIの応答が読解不能でした。もう一度試してください。")
+    else:
+        messages.append(bot_message)
 
     st.session_state["user_input"] = ""  # 入力欄を消去
 
@@ -43,7 +47,10 @@ def communicate():
 st.title("My AI Assistant")
 st.write("ChatGPT APIを使ったチャットボットです。")
 
-user_input = st.text_input("メッセージを入力してください。", key="user_input", on_change=communicate)
+user_input = st.text_input("メッセージを入力してください.", key="user_input")
+
+if st.button("送信"):  # 送信ボタンがクリックされたときに動作
+    communicate(user_input)
 
 if st.session_state["messages"]:
     messages = st.session_state["messages"]
