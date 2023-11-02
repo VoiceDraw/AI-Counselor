@@ -1,3 +1,4 @@
+%%writefile app.py
 
 import streamlit as st
 import openai
@@ -48,10 +49,7 @@ def communicate():
 st.title("My AI Assistant")
 st.write("ChatGPT APIを使ったチャットボットです。")
 
-user_input = st.text_input("メッセージを入力してください。", key="user_input")
-
-if st.button("送信"):  # 送信ボタンがクリックされたときに動作
-    communicate()
+user_input = st.text_input("メッセージを入力してください。", key="user_input", on_change=communicate)
 
 if st.session_state["messages"]:
     messages = st.session_state["messages"]
@@ -62,4 +60,3 @@ if st.session_state["messages"]:
             speaker = "🤖"
 
         st.write(speaker + ": " + message["content"])
-
